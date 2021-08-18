@@ -136,22 +136,10 @@ int main() {
                         }
                         tempuij = tempqij[0];
                         for(m = 1; m < 2; m++) {
-                            //printf("tempuij = %g\n", tempuij);
-                            //printf("tempqij[%d] = %g\n", m, tempqij[m]);
                             app = sgn(tempuij) * sgn(tempqij[m]) * minabs(tempuij,tempqij[m]);
                             app1 = triangle(tempuij,tempqij[m]);
-                            //printf("app = %g\n", app);
-                            //printf("app1 = %g\n", app1);
-                            //tempuij = ((sgn(tempuij) * sgn(tempqij[m]) * minabs(tempuij,tempqij[m])) + triangle(tempuij,tempqij[m]));
                             tempuij = app + app1;
-                            //printf("tempqij[%d] = %g\n", m, tempqij[m]);
-                            //printf("sgn(tempqij[%d]) = %d\n", m, sgn(tempqij[m]));
-                            //printf("minabs(tempuij,tempqij[m]) = %g\n", minabs(tempuij,tempqij[m]));
-                            //printf("triangle(tempuij,tempqij[m]) = %g\n", triangle(tempuij,tempqij[m]));
-                            //printf("tempuij[%d] = %g\n", m, tempuij); 
                         }
-                        //valL2 = L[i][j]-1;
-                        //uij[i][valL2] = tempuij;
                         uij[i][j] = tempuij;
                         printf("uij[%d][%d] = %g\n",i,j,uij[i][j]);
                     }
@@ -170,15 +158,15 @@ int main() {
                     for (m = 0; m < 2; m++) {
                         if (m < i) { 
                             valL = M[j][m] - 1;
-                            printf("%d\n", M[j][m] - 1);
+                            //printf("%d\n", M[j][m] - 1);
                             temp1uij[m] = uij[valL][comput1[valL]]; 
-                            printf("temp1uij[%d] = %g; uij[%d][%d] = %g; \n",m, temp1uij[m],valL, comput1[valL], uij[valL][comput1[valL]]);
+                            //printf("temp1uij[%d] = %g; uij[%d][%d] = %g; \n",m, temp1uij[m],valL, comput1[valL], uij[valL][comput1[valL]]);
                         }
                         else if (m >= i) {
                             valL = M[j][m + 1] - 1;
-                            printf("%d\n", M[j][m + 1] - 1);
+                            //printf("%d\n", M[j][m + 1] - 1);
                             temp1uij[m] = uij[valL][comput1[valL]];
-                            printf("temp1uij[%d] = %g; uij[%d][%d] = %g; \n",m, temp1uij[m],valL, comput1[valL], uij[valL][comput1[valL]]);
+                            //printf("temp1uij[%d] = %g; uij[%d][%d] = %g; \n",m, temp1uij[m],valL, comput1[valL], uij[valL][comput1[valL]]);
                         }
                     }
                     temp1uij[2] = Lj[j];
@@ -187,6 +175,21 @@ int main() {
                 }
                 for (m = 0; m < 3; m++) {
                     comput1[M[j][m] - 1] += 1;
+                }
+            }
+            int comput2[7] = {0};
+            for (j = 0; j < 7; j++) {
+                qj[j] = Lj[j];
+                printf("qj[%d] = %g; Lj[%d] = %g\n",j,qj[j],j,Lj[j]);
+                for (i = 0; i < 3; i++) {
+                    valL = M[j][i] - 1;
+                    printf("uij[%d][%d] = %g\n",valL,comput2[valL],uij[valL][comput2[valL]]);
+                    qj[j] += uij[valL][comput2[valL]];
+                    printf("qj[%d] = %g;\n",j,qj[j]);
+                }
+                printf("qj[%d] = %g;\n",j,qj[j]);
+                for (i = 0; i < 3; i++) {
+                    comput2[M[j][i] - 1] += 1;
                 }
             }
         }
