@@ -10,7 +10,7 @@ int RANI = 0;
 
 double Ranq1();
 void normal(double sig, double *n1, double *n2);
-int sgn(double L);
+double sgn(double L);
 double minabs(double L1, double L2);
 double triangle(double L1, double L2);
 
@@ -61,9 +61,9 @@ int main(){
     int step;               // test 6 EbN0(dB) result
     int s = 0;              // receive 100 error block
     int num = 0;            // do compute block
-    int error;
-    int totalerror=0;
-    int restart = 0;
+    int error;              // error block has the number of error
+    int totalerror=0;       // after receive 100 error block, how many total error 
+    int restart = 0;        // compute check node = 0
     double sigma;
     double ebn0;
     double ebn0s[6];
@@ -77,7 +77,7 @@ int main(){
     int stp;
     // declaration end
     
-    /*ebn0s[0] = 0.9844;
+   /* ebn0s[0] = 0.9844;
     ebn0s[1] = 1.289;
     ebn0s[2] = 1.584;
     ebn0s[3] = 1.868;
@@ -113,31 +113,28 @@ int main(){
     printf("%d\n", a);
     for (i = 0; i < rc; i++) fscanf(fpr,"%d",&a);
     printf("%d\n", a);
-
     Llenrow = rc;
     Llencolumn = dc;
     Mlenrow = n; 
     Mlencolumn = dv;
-
     M = (int **)malloc(Mlenrow * sizeof(int *));
     for (i = 0; i < Mlenrow; i++) M[i] = (int *)malloc(Mlencolumn * sizeof(int));
     L = (int **)malloc(Llenrow * sizeof(int *));
     for (i = 0; i < Llenrow; i++) L[i] = (int *)malloc(Llencolumn * sizeof(int));
-
     //printf("Mlenrow = %d; Mlencolumn = %d\n", Mlenrow, Mlencolumn);
     for (j = 0; j < Mlenrow; j++) {
         for (i = 0; i < Mlencolumn; i++) {
             fscanf(fpr,"%d",&M[j][i]);
-            printf("M[%d][%d] = %d; ", j, i, M[j][i]);
+            //printf("M[%d][%d] = %d; ", j, i, M[j][i]);
         }
-        printf("\n");
+        //printf("\n");
     }
     for (i = 0; i < Llenrow; i++) {
         for (j = 0; j < dc; j++) {
             fscanf(fpr,"%d",&L[i][j]);
-            printf("L[%d][%d] = %d; ", i, j, L[i][j]);
+            //printf("L[%d][%d] = %d; ", i, j, L[i][j]);
         }
-        printf("\n");
+        //printf("\n");
     }
     fclose(fpr);
     // close file
@@ -183,21 +180,19 @@ int main(){
     uijcolumn = dc;     // uijcolumn = dc = 6 
     uij = (double **)malloc(uijrow * sizeof(double *));
     for (i = 0; i < uijrow; i++) uij[i] = (double *)malloc(uijcolumn * sizeof(double));
-
-    computlen = n;
+    computlen = n;      // computlen = n = 816 
     comput = (int *)malloc(computlen * sizeof(int));
-    comput1len = rc;
+    comput1len = rc;    // comput1len = rc = 408
     comput1 = (int *)malloc(comput1len * sizeof(int));
-    comput2len = rc;
+    comput2len = rc;    // comput2len = rc = 408
     comput2 = (int *)malloc(comput2len * sizeof(int));
-
-    qjlen = n;
+    qjlen = n;          //qjlen = n = 816
     qj = (double *)malloc(qjlen * sizeof(double));
-    checkbitlen = rc;
+    checkbitlen = rc;   // checkbitlen = rc = 408
     checkbit = (int *)malloc(checkbitlen * sizeof(int));
 
 
-    for (step = 0; step < 1; step++) {
+    for (step = 0; step < 3; step++) {
         s = 0;
         num = 0;
         totalerror = 0;
@@ -219,7 +214,7 @@ int main(){
             //printf("\n");
             ebn0 = ebn0s[step];
             //printf("log2(rc) = %g\n", log2(rc));
-            sigma = sqrt(1.0 / (/*log2(rc) * */pow(10, ebn0/10)));
+            sigma = sqrt(1.0 / (/*log2(rc) **/ pow(10, ebn0/10)));
             for(i = 0; i < rc; i++) {
                 normal(sigma, &x, &y);
                 //printf("x[%d] = %g; y[%d] = %g\n", i, x, i, y);
@@ -241,7 +236,7 @@ int main(){
             for (j = 0; j < qijcolumn; j++) {                               // initialization
                 for (i = 0; i < qijrow; i++) {
                         qij[i][j] = Lj[j];
-                        //printf("qij[%d][%d] = %g  ", i, j, qij[i][j]);
+                        //if (qij[i][j] < 0) printf("yes!!!qij[%d][%d] = %g  ", i, j, qij[i][j]);
                 }  
                 //printf("\n"); 
             }
@@ -276,17 +271,21 @@ int main(){
                             }
                         }
                         tempuij = tempqij[0];
+                        /*for (m = 0; m < 5; m++) {
+                            printf("tempqij[%d] = %g\n", m, tempqij[m]);
+                        }*/
                         for(m = 1; m < 5; m++) {
                             //printf("tempuij = %g\n", tempuij);
                             app = sgn(tempuij) * sgn(tempqij[m]) * minabs(tempuij,tempqij[m]);
                             app1 = triangle(tempuij,tempqij[m]);
                             //tempuij = ((sgn(tempuij) * sgn(tempqij[m]) * minabs(tempuij,tempqij[m])) + triangle(tempuij,tempqij[m]));
                             tempuij = app + app1;
+                            //printf("app = %g; app1 = %g\n", app, app1);
                             //printf("tempqij[%d] = %g\n", m, tempqij[m]);
-                            //sprintf("tempuij[%d] = %g\n", m, tempuij); 
+                           // printf("tempuij[%d] = %g\n", m, tempuij); 
                         }
                         uij[i][j] = tempuij;
-                        //printf("uij[%d][%d] = %g\n",i,j,uij[i][j]);
+                        //if (i == 0) printf("uij[%d][%d] = %g \n",i,j,uij[i][j]);
                     }
                     //printf("\n");
                     for (m = 0; m < 6; m++) {
@@ -336,6 +335,7 @@ int main(){
                         valL = M[j][i] - 1;
                         qj[j] += uij[valL][comput2[valL]];
                     }
+                    //printf("qj[%d] = %g;\n",j,qj[j]);
                     if (qj[j] >= 0) output[j] = 0;
                     else if (qj[j] < 0) output[j] = 1;
                     //if (output[j] == 1) printf("%d ", output[j]);
@@ -373,10 +373,10 @@ int main(){
             for(i = 0; i < n; i++) {
                 if (output[i] != codarray[i]) {
                     error += 1;
-                    printf("ouput[%d] = %d",i, output[i]);
+                    //printf("ouput[%d] = %d",i, output[i]);
                 }
             }
-            printf("\n");
+            //printf("\n");
             if (error != 0 && stp == 0) s++;
             restart = 0;
             printf("error = %d\n", error);       
@@ -400,7 +400,7 @@ int main(){
     // open write file
     FILE *outfp;
     
-    outfp = fopen("random1.txt","w");
+    outfp = fopen("result8000.txt","w");
     for (i = 0; i < 3; i++) {
          fprintf(outfp,"%g ",ebn0s[i]);
          fprintf(outfp,"%g ",berscompare[i]);
@@ -463,9 +463,9 @@ double Ranq1() {
     return RANV * 2685821657736338717LL * 5.42101086242752217E-20;
 }
 
-int sgn (double L){
-    if (L >= 0) return 1;
-    else return -1;
+double sgn (double L){
+    if (L >= 0) return 1.0;
+    else return -1.0;
 }
 
 double minabs(double L1, double L2) {

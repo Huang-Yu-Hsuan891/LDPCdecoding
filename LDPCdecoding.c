@@ -8,7 +8,7 @@ int RANI = 0;
 
 double Ranq1();
 void normal(double sig, double *n1, double *n2);
-int sgn(double L);
+double sgn(double L);
 double minabs(double L1, double L2);
 double triangle(double L1, double L2);
 
@@ -92,7 +92,7 @@ int main() {
             else code[i]= -1;
         }
         ebn0 = ebn0s[0];
-        sigma = sqrt(pow(pow(10, ebn0/10), -1));
+        sigma = sqrt(pow(log2(7) * pow(10, ebn0/10), -1));
         //printf("%g\n", sigma);
         for (i = 0; i < 7; i++) {
             normal(sigma, &x, &y);
@@ -104,7 +104,7 @@ int main() {
         printf("ebno = %g\n",ebn0);
         printf("%g\n", log2(408));
         for(i = 0; i < 7; i++) {
-            Lj[i] = log2(408) * 4 * 0.5 * ebn0 * outp[i];
+            Lj[i] = log2(7) * 4 * 0.5 * ebn0 * outp[i];
             printf("Lj[%d] = %g\n", i, Lj[i]);
         }
         for (j = 0; j < 7; j++) {
@@ -113,10 +113,15 @@ int main() {
                 printf("qij[%d][%d] = %g\n", i, j, qij[i][j]);
             }
         }
-        for (k = 0; k < 1/*100*/ && restart != 7; k++) {
+        for (k = 0; k < 100/*100*/ && restart != 7; k++) {
             restart = 0;
             comput[7] = {0};
             comput1[7] = {0};
+            for (i = 0; i < 7; i++) {
+                comput[i] = 0;
+                comput1[i] = 0;
+                printf("comput1[%d] = %d ", i, comput[i]);
+            }
             for (i = 0; i < 2; i++) tempqij[i] = 0.0;
             for (i = 0; i < 7; i++) {
                     for (j = 0; j < 3; j++) {
@@ -136,8 +141,10 @@ int main() {
                         }
                         tempuij = tempqij[0];
                         for(m = 1; m < 2; m++) {
-                            app = sgn(tempuij) * sgn(tempqij[m]) * minabs(tempuij,tempqij[m]);
+                            app = (double) sgn(tempuij) * sgn(tempqij[m]) * minabs(tempuij,tempqij[m]);
                             app1 = triangle(tempuij,tempqij[m]);
+                            printf("app = %g\n", app);
+                            printf("app1 = %g\n", app1);
                             tempuij = app + app1;
                         }
                         uij[i][j] = tempuij;
@@ -172,12 +179,16 @@ int main() {
                     temp1uij[2] = Lj[j];
                     //valL2 = M[j][i] - 1;
                     qij[i][j] = temp1uij[0] + temp1uij[1] + temp1uij[2];
+                    printf("qij[%d][%d] = %g\n", i, j, qij[i][j]);
                 }
                 for (m = 0; m < 3; m++) {
                     comput1[M[j][m] - 1] += 1;
                 }
             }
             int comput2[7] = {0};
+            for(i = 0; i < 7; i++) {
+                comput2[i] = 0;
+            }
             for (j = 0; j < 7; j++) {
                 qj[j] = Lj[j];
                 printf("qj[%d] = %g; Lj[%d] = %g\n",j,qj[j],j,Lj[j]);
@@ -188,13 +199,54 @@ int main() {
                     printf("qj[%d] = %g;\n",j,qj[j]);
                 }
                 printf("qj[%d] = %g;\n",j,qj[j]);
+                if (qj[j] >= 0) output[j] = 0;
+                else if (qj[j] < 0) output[j] = 1;
+                if (output[j] == 1) printf("%d ", output[j]);
                 for (i = 0; i < 3; i++) {
                     comput2[M[j][i] - 1] += 1;
                 }
             }
+            printf("checkbit = ");          
+            for (i = 0; i < 7; i++) {
+                checkbit[i] = 0;
+                for (j = 0; j < 3; j++) {
+                    checkbit[i] += output[L[i][j] - 1];
+                }
+                checkbit[i] = checkbit[i] % 2;
+                printf("%d",checkbit[i]);
+            }
+            printf("\n");
+            for (i = 0; i < rc; i++) {
+                if (checkbit[i] == 0) restart += 1; // restart = 408 is success
+                //if (restart == rc) printf("yes!\n");
+            }
+            stp = 0;
+            if (k == 99 && restart != rc) {
+                //printf("failure\n");
+                stp = 1;
+                s++;
+            }
         }
-        s++;
+        error = 0;
+        for(i = 0; i < n; i++) {
+            if (output[i] != cod[i]) {
+                error += 1;
+                printf("ouput[%d] = %d",i, output[i]);
+            }
+        }
+        printf("\n");
+        if (error != 0 && stp == 0) s++;
+        restart = 0;
+        printf("error = %d\n", error);       
+        totalerror += error;
+        //s++;
     }
+    double ber;
+    ber = (double)totalerror / (num * n);
+    printf("totalerror = %d\n", totalerror);
+    printf("BER = %g\n", ber);
+    
+    return 0;
 }
 
 void normal(double sig, double *n1, double *n2)
@@ -230,9 +282,9 @@ double Ranq1() {
     return RANV * 2685821657736338717LL * 5.42101086242752217E-20;
 }
 
-int sgn (double L){
-    if (L >= 0) return 1;
-    else return -1;
+double sgn (double L){
+    if (L >= 0) return 1.0;
+    else return -1.0;
 }
 
 double minabs(double L1, double L2) {
