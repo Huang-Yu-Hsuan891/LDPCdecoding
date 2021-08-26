@@ -1,0 +1,2 @@
+all not equal = 24326
+all times = 203
